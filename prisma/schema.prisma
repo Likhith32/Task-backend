@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model College {
+  id                  Int             @id @default(autoincrement())
+  name                String
+  shortName           String?
+  location            String
+  state               String
+  fees                Int
+  rating              Decimal         @db.Decimal(2, 1)
+  placementPercentage Int
+  averagePackageLpa   Decimal         @db.Decimal(5, 2)
+  highestPackageLpa   Decimal         @db.Decimal(5, 2)
+  exam                String
+  nirfRank            Int?
+  hostelAvailable     Boolean         @default(false)
+  imageUrl            String?
+  description         String?
+  createdAt           DateTime        @default(now())
+
+  courses             CollegeCourse[]
+  rankCutoffs         RankCutoff[]
+  reviews             Review[]
+  savedBy             SavedCollege[]
+  questions           Question[]
+}
+
+model Course {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique
+  colleges    CollegeCourse[]
+  rankCutoffs RankCutoff[]
+}
+
+model CollegeCourse {
+  collegeId Int
+  courseId   Int
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@id([collegeId, courseId])
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  name             String?
+  email            String            @unique
+  passwordHash     String
+  createdAt        DateTime          @default(now())
+
+  savedColleges    SavedCollege[]
+  savedComparisons SavedComparison[]
+  questions        Question[]
+  answers          Answer[]
+  reviews          Review[]
+  searchHistory    SearchHistory[]
+}
+
+model SavedCollege {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  collegeId Int
+  savedAt   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, collegeId])
+}
+
+model SavedComparison {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  collegeIds Int[]
+  label      String?
+  savedAt    DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RankCutoff {
+  id        Int     @id @default(autoincrement())
+  collegeId Int
+  exam      String
+  courseId   Int?
+  minRank   Int
+  maxRank   Int
+  year      Int     @default(2024)
+  category  String  @default("General")
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  course    Course? @relation(fields: [courseId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  collegeId Int
+  userId    Int?
+  rating    Decimal  @db.Decimal(2, 1)
+  title     String?
+  body      String
+  createdAt DateTime @default(now())
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model Question {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  collegeId Int?
+  title     String
+  body      String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  college   College? @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  answers   Answer[]
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  questionId Int
+  userId     Int?
+  body       String
+  isAccepted Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model SearchHistory {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  query      String
+  searchedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
