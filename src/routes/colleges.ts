@@ -101,7 +101,7 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
 // GET /api/colleges/:id
 router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id as string);
 
     if (isNaN(id)) {
       res.status(400).json({ error: 'Invalid college ID.' });
@@ -144,7 +144,7 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
 // POST /api/colleges/:id/reviews
 router.post('/:id/reviews', optionalAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const collegeId = parseInt(req.params.id);
+    const collegeId = parseInt(req.params.id as string);
     const { rating, title, body } = req.body;
 
     if (!body || !rating) {

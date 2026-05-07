@@ -170,7 +170,7 @@ router.post('/', optionalAuth, async (req: AuthRequest, res: Response): Promise<
 // GET /api/search/history/:userId
 router.get('/history/:userId', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const userId = parseInt(req.params.userId);
+    const userId = parseInt(req.params.userId as string);
 
     if (req.userId !== userId) {
       res.status(403).json({ error: 'Not authorized to view this history.' });

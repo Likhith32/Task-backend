@@ -23,7 +23,7 @@ router.post('/colleges', authMiddleware, async (req: AuthRequest, res: Response)
 
 router.delete('/colleges/:collegeId', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const collegeId = parseInt(req.params.collegeId);
+    const collegeId = parseInt(req.params.collegeId as string);
     const userId = req.userId!;
     await prisma.savedCollege.deleteMany({ where: { userId, collegeId } });
     res.json({ message: 'College unsaved successfully.' });
@@ -65,7 +65,7 @@ router.get('/comparisons', authMiddleware, async (req: AuthRequest, res: Respons
 
 router.delete('/comparisons/:id', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    await prisma.savedComparison.deleteMany({ where: { id: parseInt(req.params.id), userId: req.userId! } });
+    await prisma.savedComparison.deleteMany({ where: { id: parseInt(req.params.id as string), userId: req.userId! } });
     res.json({ message: 'Comparison deleted successfully.' });
   } catch (error) { res.status(500).json({ error: 'Failed to delete comparison.' }); }
 });

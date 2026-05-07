@@ -55,7 +55,7 @@ router.get('/questions/:id', async (req: any, res: Response): Promise<void> => {
 
 router.post('/questions/:id/answers', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const questionId = parseInt(req.params.id);
+    const questionId = parseInt(req.params.id as string);
     const { body } = req.body;
     if (!body) { res.status(400).json({ error: 'Answer body is required.' }); return; }
     const question = await prisma.question.findUnique({ where: { id: questionId } });
@@ -70,7 +70,7 @@ router.post('/questions/:id/answers', authMiddleware, async (req: AuthRequest, r
 
 router.patch('/answers/:id/accept', authMiddleware, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const answerId = parseInt(req.params.id);
+    const answerId = parseInt(req.params.id as string);
     const answer = await prisma.answer.findUnique({ where: { id: answerId }, include: { question: true } });
     if (!answer) { res.status(404).json({ error: 'Answer not found.' }); return; }
     if (answer.question.userId !== req.userId) { res.status(403).json({ error: 'Only the question author can accept answers.' }); return; }
