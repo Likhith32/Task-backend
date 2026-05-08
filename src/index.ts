@@ -25,7 +25,33 @@ app.use(rateLimit({
 }));
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ].filter(Boolean) as string[];
+
+    const normalizedAllowedOrigins = allowedOrigins.map(url => {
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        return `https://${url}`;
+      }
+      return url;
+    });
+
+    const isAllowed = normalizedAllowedOrigins.some(allowed => {
+      const allowedOrigin = allowed.replace(/\/$/, '');
+      return origin === allowedOrigin;
+    }) || origin.endsWith('.vercel.app') || origin.startsWith('http://localhost:');
+
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
